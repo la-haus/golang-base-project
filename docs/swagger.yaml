@@ -1,0 +1,41 @@
+basePath: /api/sample
+info:
+  contact: {}
+  description: A sample golang API
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Sample Golang API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Check if service is up and healthy
+      operationId: health
+      responses:
+        "200":
+          description: ""
+        "404":
+          description: ""
+      tags:
+      - Health
+  /test:
+    get:
+      description: sample get endpoint
+      operationId: sample-get
+      parameters:
+      - description: X-Application-Id
+        in: header
+        name: X-Application-Id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          headers:
+            Content-Encoding:
+              description: gzip
+              type: string
+        "404":
+          description: ""
+      tags:
+      - Sample Controller
+swagger: "2.0"

@@ -1,0 +1,48 @@
+name: PCP-CI-Develop
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - master
+  push:
+    branches:
+      - develop
+jobs:
+  verify:
+    name: Building sample service
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v2
+      - name: Set up Golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.16
+      - name: Install dependencies
+        run: go mod download
+      #- name: Run tests
+      #  run: go test -coverprofile=coverage.out ./...
+      #- name: SonarCloud Scan
+      #  uses: SonarSource/sonarcloud-github-action@master
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+      #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Send Slack notification
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()
+        uses: edge/simple-slack-notify@master
+        with:
+          channel: "#sample-alerts"
+          status: ${{ job.status }}
+          success_text: "${env.GITHUB_WORKFLOW} (${env.GITHUB_RUN_NUMBER}) CI finished successfully"
+          failure_text: "${env.GITHUB_WORKFLOW} (${env.GITHUB_RUN_NUMBER}) CI failed"
+          cancelled_text: "${env.GITHUB_WORKFLOW} (${env.GITHUB_RUN_NUMBER}) CI was cancelled"
+          fields: |
+            [{ "title": "Repository", "value": "${env.GITHUB_REPOSITORY}", "short": true },
+            { "title": "Branch", "value": "${env.GITHUB_HEAD_REF}", "short": true },
+            { "title": "Author", "value": "${env.GITHUB_ACTOR}", "short": true}]
